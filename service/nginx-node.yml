@@ -1,0 +1,19 @@
+# Nodeport Service
+# service/nginx-node.yml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-node
+  labels:
+    services: nginx1
+
+spec:
+  selector:
+    service: nginx
+  type: NodePort
+  ports:
+    - nodePort: 30000    # nodeport---visible outside
+      port: 80           # service port
+      targetPort: 80     # containerPort

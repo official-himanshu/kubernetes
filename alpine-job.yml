@@ -1,0 +1,21 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+        name: countdown
+spec:
+        template:
+                metadata:
+                        name: count
+                        labels:
+                                tier: test
+                spec:
+                        containers:
+                                - name: counter
+                                  image: alpine
+                                  command:
+                                          - "/bin/sh"
+                                          - "-c"
+                                          - "for i in 1 2 3 4 5 6 7 8 9 10; do echo $i;sleep 10; done"
+                        restartPolicy: OnFailure 
+

@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+        name: test
+spec:
+        replicas: 4
+        selector:
+                tier: dev
+        template:
+                metadata:
+                        name: nginx-18
+                        labels:
+                                tier: dev
+                spec:
+                        containers:
+                                - name: nginxv18
+                                  image: nginx:1.18.0
+                                  ports:
+                                          - containerPort: 80
+
+
+

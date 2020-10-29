@@ -1,0 +1,26 @@
+# Deployment
+# controller/nginx-deploy.yml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    service: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      service: nginx
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        service: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.7.9
+          ports:
+            - containerPort: 80
+

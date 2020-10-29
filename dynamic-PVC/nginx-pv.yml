@@ -1,0 +1,17 @@
+# nginx-pv.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pv-pod
+spec:
+  containers:
+    - name: nginx-co
+      image: nginx:latest
+      volumeMounts:
+        - mountPath: /test-pd
+          name: test-volume
+
+  volumes:
+    - name: test-volume
+      persistentVolumeClaim:
+        claimName: claim

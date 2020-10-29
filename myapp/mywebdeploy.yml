@@ -1,0 +1,28 @@
+# Deployment
+# controller/nginx-deploy.yml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mywebapp
+  labels:
+    service: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: nginx
+  template:
+    metadata:
+      name: mywebapp-pod
+      labels:
+        service: nginx
+    spec:
+      containers:
+        - name: mywebapp
+          image: docker.io/himanshuchaudhary/mywebapp:v1
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+            - name: mycred
+

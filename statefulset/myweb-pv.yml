@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: myweb-pv
+spec:
+  capacity:
+    storage: 15Gi
+  storageClassName: myweb
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"

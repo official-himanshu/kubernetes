@@ -1,0 +1,13 @@
+# persistent volume claim
+# pvc-dc1.yml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: claim-2
+spec:
+  resources:
+    requests:
+      storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast

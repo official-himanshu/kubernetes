@@ -1,0 +1,71 @@
+# es-data-ss.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: es-ingest
+  labels:
+    service: elasticsearch
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: elasticsearch
+  template:
+    metadata:
+      labels:
+        service: elasticsearch
+        node: ingest
+    spec:
+      terminationGracePeriodSeconds: 300
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: node
+                    operator: In
+                    values: 
+                      - ingest
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+      initContainers:
+      - name: increase-the-vm-max-map-count
+        image: busybox
+        command:
+        - sysctl
+        - -w
+        - vm.max_map_count=262144
+        securityContext:
+          privileged: true
+      containers:
+      - name: elasticsearch-ingest
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: transport
+        env:
+          - name: cluster.name
+            value: elasticsearch-cluster
+          - name: node.name
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: node.master
+            value: "false"
+          - name: node.ingest
+            value: "true"
+          - name: node.data
+            value: "false"
+          - name: discovery.seed_hosts
+            value: "elasticsearch"
+          - name: network.host
+            value: "_site_,_lo_" 
+          - name: ES_JAVA_OPTS
+            value: -Xms512m -Xmx512m
+        volumeMounts:
+        - name: storage
+          mountPath: /data
+      volumes:
+      - emptyDir: {}
+        name: storage

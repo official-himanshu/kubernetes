@@ -1,0 +1,85 @@
+# es-master-ss.yml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-master
+  labels:
+    service: elasticsearch
+spec:
+  serviceName: elasticsearch
+  replicas: 3
+  selector:
+    matchLabels:
+      service: elasticsearch
+  template:
+    metadata:
+      labels:
+        service: elasticsearch
+    spec:
+      terminationGracePeriodSeconds: 300
+      initContainers:
+      - name: fix-the-volume-permission
+        image: busybox
+        command:
+        - sh
+        - -c
+        - chown -R 1000:1000 /usr/share/elasticsearch/data
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+      - name: increase-the-vm-max-map-count
+        image: busybox
+        command:
+        - sysctl
+        - -w
+        - vm.max_map_count=262144
+        securityContext:
+          privileged: true
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: transport
+        env:
+          - name: cluster.name
+            value: elasticsearch-cluster
+          - name: node.name
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: node.master
+            value: "true"
+          - name: node.ingest
+            value: "false"
+          - name: node.data
+            value: "false"
+          - name: discovery.seed_hosts
+            value: "elasticsearch"
+          #- name: discovery.seed_hosts
+          #  value: "es-master-0.elasticsearch.default.svc.cluster.local,es-master-1.elasticsearch.default.svc.cluster.local,es-master-2.elasticsearch.default.svc.cluster.local,es-data-0.elasticsearch.default.svc.cluster.local,es-data-1.elasticsearch.default.svc.cluster.local,es-data-2.elasticsearch.default.svc.cluster.local"
+          #- name: discovery.zen.ping.unicast.hosts
+          #  value: "es-master-0.elasticsearch.default.svc.cluster.local,es-master-0.elasticsearch.default.svc.cluster.local,es-master-0.elasticsearch.default.svc.cluster.local,es-data-0.elasticsearch.default.svc.cluster.local,es-data-0.elasticsearch.default.svc.cluster.local,es-data-0.elasticsearch.default.svc.cluster.local"
+          - name: network.host
+            value: "_site_,_lo_"  
+          - name: cluster.initial_master_nodes
+            value: "es-master-0,es-master-1,es-master-2"
+          - name: ES_JAVA_OPTS
+            value: -Xms512m -Xmx512m
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: ssd
+      resources:
+        requests:
+          storage: 3Gi

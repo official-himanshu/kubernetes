@@ -1,0 +1,20 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+        name: ubuntu-job
+spec:
+        backoffLimit: 3
+        # activeDeadlineSeconds: 10
+        # ttlSecondsAfterFinished: 20
+        parallelism: 2
+        completions: 100
+        template:
+                spec:
+                        containers:
+                                - name: ubuntu
+                                  image: ubuntu
+                                  command:
+                                          - "/bin/cat"
+                                          - "/etc/os"
+                        restartPolicy: OnFailure
