@@ -1,0 +1,49 @@
+# namespace level role binding using role and rolebinding for dashboard
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: read-only-pods-deploy
+  namespace: devops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:  
+  name: read-only-pods-deploy-role
+  namespace: devops
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods  
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - delete
+- apiGroups:
+  - apps
+  resources:
+  - deployments 
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - delete
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-only-pods-deploy-binding
+  namespace: devops
+roleRef:
+  kind: Role
+  name: read-only-pods-deploy-role
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: read-only-pods-deploy
+  namespace: devops
