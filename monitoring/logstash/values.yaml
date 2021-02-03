@@ -44,7 +44,7 @@ secrets: []
 #  - name: "env"
 #    value:
 #      ELASTICSEARCH_PASSWORD: "LS1CRUdJTiBgUFJJVkFURSB"
-#      api_key: ui2CsdUadTiBasRJRkl9tvNnw
+#      api_key: 
 #  - name: "tls"
 #    value:
 #      ca.crt: |
