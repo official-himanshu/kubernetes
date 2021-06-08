@@ -1,0 +1,12 @@
+{{- if $file := .Values.configs }}
+{{- range $file := .Values.configs }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $file.name }} 
+    
+data: 
+  {{ regexFind "[^/]+$" (printf "%s" $file.fileName) -}}: |-
+  {{- $.Files.Get (printf "%s" $file.filePath ) | nindent 4 -}}
+{{ end }}
+{{ end }}

@@ -2,12 +2,24 @@
 apiVersion: v1
 kind: Pod
 metadata:
-        name: nginx-pod
-        labels:
-                app: nginx
+  name: nginx
+  labels:
+    app: nginx
 spec:
-        containers:
-                - name: nginx-container
-                  image: nginx:stable-alpine 
+  containers:
+    - name: nginx-container
+      image: nginx:stable-alpine
+      ports:
+        - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  ports:
+    - protocol: TCP
+      port: 80 
 
                   

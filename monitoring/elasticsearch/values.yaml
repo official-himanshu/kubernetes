@@ -13,8 +13,8 @@ roles:
   ingest: "true"
   data: "true"
 
-replicas: 3
-minimumMasterNodes: 2
+replicas: 2
+minimumMasterNodes: 1
 
 esMajorVersion: ""
 
@@ -64,8 +64,8 @@ esJavaOpts: "-Xmx1g -Xms1g"
 
 resources:
   requests:
-    cpu: "1000m"
-    memory: "2Gi"
+    cpu: "100m"
+    memory: "1Gi"
   limits:
     cpu: "1000m"
     memory: "2Gi"
@@ -92,7 +92,7 @@ volumeClaimTemplate:
   accessModes: [ "ReadWriteOnce" ]
   resources:
     requests:
-      storage: 30Gi
+      storage: 10Gi
 
 rbac:
   create: false
@@ -153,7 +153,7 @@ antiAffinityTopologyKey: "kubernetes.io/hostname"
 
 # Hard means that by default pods will only be scheduled if there are enough nodes for them
 # and that they will never end up on the same node. Setting this to soft will do this "best effort"
-antiAffinity: "hard"
+antiAffinity: "soft"
 
 # This is the node affinity settings as defined in
 # https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#node-affinity-beta-feature

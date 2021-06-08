@@ -40,10 +40,10 @@ podAnnotations: {}
 
 resources:
   requests:
-    cpu: "1000m"
-    memory: "2Gi"
+    cpu: "50m"
+    memory: "500Mi"
   limits:
-    cpu: "1000m"
+    cpu: "500m"
     memory: "2Gi"
 
 protocol: http
@@ -94,7 +94,7 @@ updateStrategy:
   type: "Recreate"
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   loadBalancerIP: ""
   port: 5601
   nodePort: ""

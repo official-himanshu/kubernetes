@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mywebapp
+  annotations:
+    kubernetes.io/ingress.class: traefik-cert-manager
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: mywebapp.himanshuchaudhary.tech
+      http:
+        paths:
+        - pathType: Prefix
+          path: /
+          backend:
+            service:
+              name: mywebapp
+              port:
+                number: 80
+  tls:
+    - hosts:
+        - mywebapp.himanshuchaudhary.tech
+      secretName: mywebapp-prod

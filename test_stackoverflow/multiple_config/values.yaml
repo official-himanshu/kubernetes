@@ -1,0 +1,9 @@
+configs:
+  - name: "appconfig"
+    filePath: "properties/application-dev.properties"
+    fileName: "application.properties"
+    mountPath: "/deployments/config"
+  - name: "redisconfig"
+    filePath: "properties/redis/redisson-dev.yaml"
+    fileName: "redisson.yaml"
+    mountPath: "/deployments/config"

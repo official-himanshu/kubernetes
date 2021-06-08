@@ -1,0 +1,17 @@
+name: nginx
+image: nginx:stable-alpine
+imagePullPolicy: Always
+restartPolicy: Always
+replicas: 1
+port: 8080
+nodeSelector:
+  nodetype: free
+configHocon: |
+  streams {
+        monitoring {
+            custom {
+              uri = ${?URI}
+              method = ${?METHOD}
+            }
+        }
+    }

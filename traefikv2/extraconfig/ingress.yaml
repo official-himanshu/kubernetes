@@ -1,0 +1,15 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: test
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`test.55rush.com`)
+      kind: Rule
+      services:
+        - name: ui
+          port: 80
+  tls:
+    secretName: mysecret

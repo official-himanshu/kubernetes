@@ -6,24 +6,45 @@ replicas: 1
 #
 # Note that when overriding logstash.yml, `http.host: 0.0.0.0` should always be included
 # to make default probes work.
-logstashConfig: {}
-#  logstash.yml: |
-#    key:
-#      nestedkey: value
+logstashConfig:
+  logstash.yml: |
+    http.host: "0.0.0.0"
+    path.config: /usr/share/logstash/pipeline
 #  log4j2.properties: |
 #    key = value
 
 # Allows you to add any pipeline files in /usr/share/logstash/pipeline/
 ### ***warn*** there is a hardcoded logstash.conf in the image, override it first
-logstashPipeline: {}
-#  logstash.conf: |
-#    input {
-#      exec {
-#        command => "uptime"
-#        interval => 30
-#      }
-#    }
-#    output { stdout { } }
+logstashPipeline:
+  logstash.conf: |
+    input {
+      beats {
+        port => 5044
+        host => "0.0.0.0"
+        }
+      }
+      filter {
+        if [message] =~ /^\{.*\}$/ {
+          json {
+            source => "message"
+          }
+        }
+        mutate {
+          convert => ["response", "integer"]
+          convert => ["bytes", "integer"]
+          convert => ["responsetime", "float"]
+        }
+        date {
+          match => [ "timestamp" , "dd/MMM/YYYY:HH:mm:ss Z" ]
+          remove_field => [ "timestamp" ]
+        }
+      }
+      output {
+        elasticsearch {
+          hosts => [ "elasticsearch-master:9200" ]
+          index => [ "logstash-%{+YYYY.MM.dd}" ]
+        }
+      }
 
 # Extra environment variables to append to this nodeGroup
 # This will be appended to the current 'env:' key. You can use any of the kubernetes env
@@ -44,6 +65,7 @@ secrets: []
 #  - name: "env"
 #    value:
 #      ELASTICSEARCH_PASSWORD: "LS1CRUdJTiBgUFJJVkFURSB"
+#      api_key: ui2CsdUadTiBasRJRkl9tvNnw
 #  - name: "tls"
 #    value:
 #      ca.crt: |
@@ -68,15 +90,15 @@ podAnnotations: {}
 # additionals labels
 labels: {}
 
-logstashJavaOpts: "-Xmx1g -Xms1g"
+logstashJavaOpts: "-Xmx500m -Xms500m"
 
 resources:
   requests:
-    cpu: "100m"
-    memory: "1536Mi"
+    cpu: "50m"
+    memory: "500Mi"
   limits:
-    cpu: "1000m"
-    memory: "1536Mi"
+    cpu: "100m"
+    memory: "1Gi"
 
 volumeClaimTemplate:
   accessModes: [ "ReadWriteOnce" ]
@@ -153,9 +175,9 @@ podManagementPolicy: "Parallel"
 httpPort: 9600
 
 # Custom ports to add to logstash
-extraPorts: []
-  # - name: beats
-  #   containerPort: 5001
+#extraPorts:
+#  - name: beats
+#    containerPort: 5001
 
 updateStrategy: RollingUpdate
 
@@ -233,15 +255,15 @@ lifecycle: {}
   #   exec:
   #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
 
-service: {}
-#  annotations: {}
-#  type: ClusterIP
-#  ports:
-#    - name: beats
-#      port: 5044
-#      protocol: TCP
-#      targetPort: 5044
-#    - name: http
-#      port: 8080
-#      protocol: TCP
-#      targetPort: 8080
+service:
+  annotations: {}
+  type: ClusterIP
+  ports:
+    - name: beats
+      port: 5044
+      protocol: TCP
+      targetPort: 5044
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080

@@ -3,21 +3,35 @@
 # such as filebeat.yml
 filebeatConfig:
   filebeat.yml: |
-    filebeat.inputs:
-    - type: container
-      paths:
-        - /var/log/containers/*.log
-      processors:
-      - add_kubernetes_metadata:
-          host: ${NODE_NAME}
-          matchers:
-          - logs_path:
-              logs_path: "/var/log/containers/"
+    filebeat.autodiscover:
+        providers:
+        - type: kubernetes
+          templates:
+            - condition:
+                or:
+                  - equals:
+                      kubernetes.namespace: "default"
+                  - equals:
+                      kubernetes.namespace: "app"
+              config:
+                - type: container
+                  enabled: true
+                  paths:
+                    - /var/log/containers/*-${data.kubernetes.container.id}.log
+                  exclude_lines: ["^\\s+[\\-`('.|_]"]
+                  ignore_older: 24h
+                  close_inactive: 5m
+                  close_removed: true
+                  clean_removed: true
+    processors:
+      - add_cloud_metadata:
+      - add_host_metadata:
 
     output.elasticsearch:
-      host: '${NODE_NAME}'
-      hosts: '${ELASTICSEARCH_HOSTS:elasticsearch-master:9200}'
-
+      hosts: ['elasticsearch-master:9200']
+      ilm.enabled: true
+      ilm.rollover_alias: "filebeat"
+      ilm.pattern: "{now/d}-000001"
 # Extra environment variables to append to the DaemonSet pod spec.
 # This will be appended to the current 'env:' key. You can use any of the kubernetes env
 # syntax here
@@ -101,10 +115,10 @@ podSecurityContext:
 
 resources:
   requests:
-    cpu: "100m"
+    cpu: "50m"
     memory: "100Mi"
   limits:
-    cpu: "1000m"
+    cpu: "100m"
     memory: "200Mi"
 
 # Custom service account override that the pod will use
